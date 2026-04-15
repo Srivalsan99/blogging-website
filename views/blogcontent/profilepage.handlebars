@@ -1,0 +1,121 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a href="/" class="navbar-brand gap-2 ">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-box-arrow-right" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"/>
+            <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"/>
+        </svg>
+        <span>Explore</span>
+    </a>
+    <form action="/homepage/deleteuser/{{userid}}" method="post" class="me-2">
+        <button type="submit" class="btn btn-danger" id="deleteUser"
+                onclick="return confirm('Are you sure you want to delete your account?');">
+            Delete this account
+        </button>
+    </form>
+</nav>
+<div class="container">
+    <br/>
+    <br/>
+    <div class="container">
+        <div class="row ">
+            <h1>User Info:</h1>
+            <br/>
+            <br/>
+            <br/>
+            <div class="col-1">
+            </div>
+            <div class="col-4 ">
+            <img src="{{image}}" alt="Avatar" width="200" height="200" class="rounded-circle bg-light">
+            </div>
+            <div class="col-6 gap-60">
+                <h1>{{real_name}}</h1>
+                <p><strong>DOB: </strong>{{dob}}</p>
+                <p><strong>Description: </strong>{{description}}</p>
+                <p><strong>userid: </strong>{{userid}}</p>
+            </div>
+        </div>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <div class="row  justify-content-center align-items-center">
+            <h1>Activities:</h1>
+            <br/>
+            <p></p>
+            <p></p>
+            <p></p>
+            <p></p>
+            <button type="button" onclick="window.location.href='/homepage/create'" class="btn btn-outline-light w-auto">
+                <h4 class="text-center">Create a New Blog:</h4>
+                <svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" fill="currentColor" class="bi bi-journal-plus" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 5.5a.5.5 0 0 1 .5.5v1.5H10a.5.5 0 0 1 0 1H8.5V10a.5.5 0 0 1-1 0V8.5H6a.5.5 0 0 1 0-1h1.5V6a.5.5 0 0 1 .5-.5"/>
+                    <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2"/>
+                    <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1z"/>
+                </svg>
+            </button>
+            <p></p>
+            <p></p>
+            <p></p>
+            <p></p>
+            <p></p>
+            <p></p>
+            <h4><u>Your Recent Activities</u></h4>
+            <p></p>
+            <p></p>
+        </div>
+
+        <div class="row justify-content-center align-items-center bg-secondary">
+            <p></p>
+
+            {{#if blogPublished.length}}
+                <ul class="list-group list-group-flush w-100">
+
+                    {{#each blogPublished}}
+                        <li class="list-group-item bg-secondary border-0">
+
+                            <div class="card bg-dark text-light shadow-sm">
+                                <div class="card-body">
+                                    <!-- Action bar -->
+                                    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                                        <span class="me-2">❤️ {{likeCount}} </span>
+                                        <a href="/homepage/edit/{{this.id}}" class="btn btn-sm btn-outline-primary me-2">
+                                            Edit
+                                        </a>
+                                        <a href="/homepage/read/{{this.id}}" class="btn btn-sm btn-outline-light me-2">
+                                            Read
+                                        </a>
+
+                                        <form action="/homepage/delete/{{this.id}}" method="post" class="me-2">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" id="deleteUser"
+                                                    onclick="return confirm('Are you sure you want to delete this blog?');">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </nav>
+                                    <!-- Blog title -->
+                                    <h4 class="fw-bold">{{this.title}}</h4>
+                                    <!-- Metadata -->
+                                    <small class="text-secondary">
+                                        Created on {{this.date}}
+                                    </small>
+                                </div>
+                            </div>
+                        </li>
+                    {{/each}}
+                </ul>
+            {{else}}
+                <p class="text-muted text-center">
+                    You haven't published any blogs yet.
+                </p>
+            {{/if}}
+            <p></p>
+        </div>
+        <p></p>
+        <p></p>
+        <p></p>
+        <p></p>
+        <p></p>
+        <p></p>
+    </div>
+</div>
+

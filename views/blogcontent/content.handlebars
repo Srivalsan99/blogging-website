@@ -1,0 +1,115 @@
+{{#if success}}
+  <script>
+    alert(" Blog published successfully!");
+  </script>
+{{/if}}
+
+{{#if error}}
+  <script>
+    alert(" Blog publish failed! Try again.");
+  </script>
+{{/if}}
+<form action="/homepage/publish" method="post" id="publishForm">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a href="/" class="navbar-brand gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-box-arrow-right" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"/>
+            <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"/>
+        </svg>
+        <span>Explore</span>
+    </a>
+
+    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#confirmPublish">
+    + Publish Blog
+    </button>
+</nav>
+<div class="modal fade" id="confirmPublish" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm Publication</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <p>Are you sure you want to publish this blog post?</p>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+         {{!-- onclick="window.location.href='/blogcontent/publish'" --}}
+        <button type="submit" class="btn btn-success" id="publishData" >Publish Now</button>
+      </div>
+    </div>
+  </div>
+</div>
+    <p></p>
+
+<h1 >Write your Blog</h1>
+    <p></p>
+    <p></p>
+
+    <p></p>
+    <h3>heading</h3>
+    <input type="input" name="heading" class="w-75 justify-content-centre bg-secondary">
+    <p></p>
+    <h3>Body:</h3>
+    <p></p>
+    <div class="form-group" id="editor"></div>
+    <input type="hidden" name="content" id="quillContent">
+    <input type="hidden" name="'blogid" value="{{blogid}}">
+</form>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<script>
+  const quill = new Quill('#editor', {
+    modules: {
+      toolbar: [
+          [{ list: 'ordered' }, { list: 'bullet' }],
+        [{ header: [1, 2, 3, 4, 5, 6, false] }],
+        ['bold', 'italic', 'underline'],
+        ['image', 'code-block'],
+      ],
+    },
+    placeholder: 'Compose an epic...',
+    theme: 'snow',
+  });
+
+  // For Create Part
+  const form = document.querySelector('#publishForm');
+  form.onsubmit = function(e) {
+    const headingInput = document.querySelector('input[name="heading"]');
+    const heading = headingInput.value.trim();
+    {{!-- e.preventDefault(); --}}
+    const htmlContent = quill.root.innerHTML;
+    const plainText = quill.getText().trim(); // Quill plain text
+    // console.log(htmlContent)
+    // Validation
+    if (!heading) {
+      e.preventDefault();
+      alert("Please enter a heading!");
+      return false;
+    }
+
+    if (!plainText) {
+      e.preventDefault();
+      alert("Please write something in the blog body!");
+      return false;
+    }
+
+    const sizeMB = new Blob([htmlContent]).size / (1024 * 1024);
+    const maxMB = 250;
+    if (sizeMB > maxMB) {
+      e.preventDefault();
+      alert(`Your blog content is too large (~${Math.round(sizeMB)} MB).`);
+      return false;
+    }
+
+    // Put HTML content into hidden input so server receives it
+    document.querySelector('#quillContent').value = htmlContent;
+    console.log('Final')
+    // console.log(document.querySelector('#quillContent').value)
+  };
+
+</script>
+

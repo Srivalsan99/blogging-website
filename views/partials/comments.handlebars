@@ -1,0 +1,245 @@
+<div class="col-3 h-100 p-0 bg-secondary">
+    <div class="card-body d-flex flex-column h-100">
+        <h2 class="text-light">Comments</h2>
+        {{#if user}}
+            <div class="form-check form-switch text-light mb-2">
+                <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="toggleCommentsSwitch"
+                        checked
+                >
+                <label class="form-check-label" for="toggleCommentsSwitch">
+                    Show comments
+                </label>
+            </div>
+            {{#if isAuthor}}
+
+            {{/if}}
+        {{/if}}
+        {{#if user}}
+            <form id="commentForm" class="mb-2">
+                    <textarea
+                            id="newComment"
+                            class="form-control form-control-sm mb-2"
+                            rows="2"
+                            placeholder="Add a comment..."
+                    ></textarea>
+                <button type="submit" class="btn btn-success btn-sm w-100">
+                    Post Comment
+                </button>
+            </form>
+
+            <hr class="border-light">
+
+            <div id="commentsList" class="flex-grow-1 overflow-auto">
+                <ul
+                        id="commentRoot"
+                        class="list-unstyled"
+                        data-cardblogid="{{blogid}}"
+                        data-carduserid="{{user}}"
+                ></ul>
+            </div>
+        {{else}}
+            <p class="text-light small">
+                Please sign in to view and post comments.
+            </p>
+        {{/if}}
+
+    </div>
+</div>
+
+
+<template id="commentTemplate">
+    <li class="mb-2 comment-content" data-blogid="{{blogid}}" data-user="{{user}}">
+        <div class="card bg-dark text-light rounded-0">
+            <div class="card-body py-2">
+                <strong class="comment-user"></strong>
+                <p class="comment-text mb-1"></p>
+
+                <button class="btn btn-link btn-sm text-success p-0 reply-btn">
+                    Reply
+                </button>
+
+                <!-- DELETE BUTTON WILL BE ADDED DYNAMICALLY -->
+
+                <div class="reply-box d-none mt-2" >
+          <textarea
+                  class="form-control form-control-sm mb-1"
+                  rows="2"
+                  placeholder="Write a reply..."
+          ></textarea>
+                    <button class="btn btn-success btn-sm reply-submit">
+                        Reply
+                    </button>
+                </div>
+
+                <ul class="list-unstyled mt-2 ms-3 replies"></ul>
+            </div>
+        </div>
+    </li>
+</template>
+
+
+<script>
+
+
+    const commentRoot = document.querySelector('#commentRoot');
+    const template = document.querySelector('#commentTemplate');
+    const LOGGED_USER = "{{user}}";
+    const BLOG_ID = commentRoot.dataset.cardblogid;
+    const BLOG_AUTHOR = "{{author}}";
+
+    const commentForm = document.querySelector('#commentForm');
+    const newCommentInput = document.querySelector('#newComment');
+
+    const toggleBtn = document.querySelector('#toggleCommentsBtn');
+    const commentsList = document.querySelector('#commentsList');
+
+    // TO ENABLE OR DISABLE COMMENT
+    const toggleSwitch = document.querySelector('#toggleCommentsSwitch');
+    // toggleSwitc
+    toggleSwitch?.addEventListener('change', () => {
+        const enabled = toggleSwitch.checked;
+        if (enabled) {
+            commentForm.className='mb-2'
+            commentsList.className='flex-grow-1 overflow-auto'
+        }else {
+            commentForm.className='invisible'
+            commentsList.className='invisible'
+        }
+    })
+
+
+
+
+    // SERVER COMMUNICATION
+    function sendCommentsToServer() {
+        // document.querySelector('#comment-content');
+        console.log(commentRoot.innerHTML)
+        fetch('/homepage/comments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                blogid: BLOG_ID,
+                userid: LOGGED_USER,
+                html: commentRoot.innerHTML
+            })
+        }).catch(err => console.error('Save error:', err));
+    }
+
+    function loadCommentsFromServer() {
+        fetch(`/homepage/commentsU/${BLOG_ID}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data?.html) {
+                        commentRoot.innerHTML = data.html;
+                        // console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+                        // console.log(data.html)
+                        rebindCommentEvents();
+                    }
+                })
+                .catch(err => console.error('Load error:', err));
+    }
+
+    // COMMENT CREATION
+    function formatDateTime() {
+        return new Date().toLocaleString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+    }
+
+    function createComment(username, text) {
+        const clone = template.content.cloneNode(true);
+        const comment = clone.querySelector('.comment-content');
+
+        comment.querySelector('.comment-user').textContent = username;
+        comment.querySelector('.comment-text').innerHTML =
+                `<small class="text-secondary">${formatDateTime()}</small><br>${text}`;
+
+        // Dynamically add delete button only if user can delete
+        if (username === LOGGED_USER || LOGGED_USER === BLOG_AUTHOR) {
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn btn-link btn-sm text-danger p-0 delete-btn';
+            deleteBtn.textContent = 'Delete';
+            // insert before reply box
+            const replyBox = comment.querySelector('.reply-box');
+            replyBox.parentNode.insertBefore(deleteBtn, replyBox);
+        }
+
+        bindCommentEvents(comment, username);
+        return clone;
+    }
+
+    // EVENT BINDING
+    function bindCommentEvents(comment, commentUser = null) {
+        console.log(comment.querySelector('.comment-user').innerText);
+
+        const replyBtn = comment.querySelector('.reply-btn');
+        const replyBox = comment.querySelector('.reply-box');
+        const replySubmit = comment.querySelector('.reply-submit');
+        const textarea = replyBox.querySelector('textarea');
+        const replies = comment.querySelector('.replies');
+        let deleteBtn = comment.querySelector('.delete-btn');
+
+        try{
+            deleteBtn.remove()
+        } catch(err){
+            console.log(err)
+        }
+
+        console.log(BLOG_AUTHOR,BLOG_AUTHOR===LOGGED_USER);
+        if (comment.querySelector('.comment-user').innerText===LOGGED_USER || BLOG_AUTHOR===LOGGED_USER  ){
+            deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn btn-link btn-sm text-danger p-0 delete-btn';
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.setAttribute('data-user', commentUser);
+            const replyBox = comment.querySelector('.reply-box');
+            replyBox.parentNode.insertBefore(deleteBtn, replyBox);
+
+        }else{
+            console.log('different')
+        }
+
+
+        replyBtn.addEventListener('click', () => replyBox.classList.toggle('d-none'));
+
+        replySubmit.addEventListener('click', () => {
+            if (!textarea.value.trim()) return;
+
+            replies.appendChild(createComment(LOGGED_USER, textarea.value));
+            textarea.value = '';
+            replyBox.classList.add('d-none');
+            sendCommentsToServer();
+        });
+
+        deleteBtn?.addEventListener('click', () => {
+            comment.remove();
+            sendCommentsToServer();
+        });
+    }
+
+    function rebindCommentEvents() {
+        commentRoot.querySelectorAll('.comment-content').forEach(comment =>
+                bindCommentEvents(comment));
+    }
+
+    // FORM SUBMIT
+    if (LOGGED_USER) {
+        commentForm?.addEventListener('submit', e => {
+            e.preventDefault();
+            if (!newCommentInput.value.trim()) return;
+
+            commentRoot.appendChild(createComment(LOGGED_USER, newCommentInput.value));
+            newCommentInput.value = '';
+            sendCommentsToServer();
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', loadCommentsFromServer);
+
+</script>

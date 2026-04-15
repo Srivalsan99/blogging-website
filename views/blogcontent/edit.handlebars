@@ -1,0 +1,127 @@
+{{#if heading}}
+
+{{else}}
+    <script>
+        alert("Sorry !!!,Heading is Missing to load, Go back to your Profile page and try again.")
+    </script>
+{{/if}}
+
+{{#if content}}
+{{else}}
+    <script>
+        alert("Sorry !!!,Body is Missing to load, Go back to your Profile page and try again.")
+    </script>
+{{/if}}
+
+<form action="/homepage/confirmChange" method="post" id="confirmForm">
+    <input type="hidden" name="blogid" value="{{blogid}}">
+    
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a href="/" class="navbar-brand gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-box-arrow-right" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z"/>
+                <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"/>
+            </svg>
+            <span>Explore</span>
+        </a>
+
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#confirmedit">
+            + Save changes to Blog
+        </button>
+    </nav>
+    
+    <div class="modal fade" id="confirmedit" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Publication</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p>Are you sure you want to edit this blog post?</p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success" id="editData">Edit Now</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <p></p>
+    <h1>Edit your Blog</h1>
+    <p></p>
+    <p></p>
+
+    <h3>Heading</h3>
+    <input type="text" name="heading" value="{{heading}}" class="w-75 justify-content-centre bg-secondary form-control">
+    <p></p>
+    <h3>Body:</h3>
+    <p></p>
+    <div id="editor" ></div>
+    <input type="hidden" name="content" id="quillContent">
+</form>
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<script>
+    // Initialize Quill editor
+    const quill = new Quill('#editor', {
+        modules: {
+            toolbar: [
+                [{ list: 'ordered' }, { list: 'bullet' }],
+                [{ header: [1, 2, 3, 4, 5, 6, false] }],
+                ['bold', 'italic', 'underline'],
+                ['image', 'code-block'],
+            ],
+        },
+        placeholder: 'Edit your blog content...',
+        theme: 'snow',
+    });
+
+    // Set the existing content
+    const existingContent = `{{{content}}}`;
+    quill.root.innerHTML = existingContent;
+
+    // Form submission handler
+    const form = document.querySelector('#confirmForm');
+    form.onsubmit = function(e) {
+        
+        const headingInput = document.querySelector('input[name="heading"]');
+        const heading = headingInput.value.trim();
+        
+        // Get content from Quill
+        const htmlContent = quill.root.innerHTML;
+        const plainText = quill.getText().trim();
+        
+        // Validation
+        if (!heading) {
+            alert("Please enter a heading!");
+            return false;
+        }
+
+        if (!plainText) {
+            alert("Please write something in the blog body!");
+            return false;
+        }
+
+        const sizeMB = new Blob([htmlContent]).size / (1024 * 1024);
+        const maxMB = 250;
+        if (sizeMB > maxMB) {
+            alert(`Your blog content is too large (~${Math.round(sizeMB)} MB).`);
+            return false;
+        }
+
+        // Put HTML content into hidden input
+        document.querySelector('#quillContent').value = htmlContent;
+        
+        // If validation passes, submit the form
+        form.submit();
+    };
+
+    // Handle modal button click
+    document.querySelector('#editData').addEventListener('click', function() {
+        // Trigger form submission
+        form.submit();
+    });
+</script>

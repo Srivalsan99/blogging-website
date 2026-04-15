@@ -1,0 +1,201 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <!-- Brand -->
+        <div class="d-flex ">
+            {{#if loggedStatus}}
+                <div class="dropdown">
+                    <a class="navbar-brand d-flex align-items-center gap-2 dropdown-toggle"
+                       href="#"
+                       role="button"
+                       data-bs-toggle="dropdown"
+                       aria-expanded="false">
+                        <img src="{{image}}" alt="Avatar" width="24" height="24" class="rounded-circle">
+                        <span class="fw-semibold">{{user}}</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="/homepage/profile">Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="/account/logout">Logout</a></li>
+                    </ul>
+                </div>
+            {{else}}
+                <a class="navbar-brand gap-2" href="account/login">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"
+                         fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                        <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                        <path fill-rule="evenodd"
+                              d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+                    </svg>
+                    <span class="fw-semibold" id="login-span">Log in</span>
+                </a>
+            {{/if}}
+
+            <select class="form-select form-select-sm w-auto" id="sortSelect">
+                <option value="">Sort by...</option>
+                <option value="username">USER NAME ASC</option>
+                <option value="title">TITLE ASC</option>
+                <option value="date">DATE ASC</option>
+                <option value="usernamed">USER NAME DESC</option>
+                <option value="titled">TITLE DESC</option>
+                <option value="dated">DATE DESC</option>
+            </select>
+        </div>
+
+        <!-- Push search to the right -->
+<!--        <form class="d-flex " role="search">-->
+<!--            <input class="form-control form-control-sm me-2"-->
+<!--                   type="search" placeholder="Search..." aria-label="Search">-->
+<!--            <button class="btn btn-success btn-sm" type="submit">Search</button>-->
+<!--        </form>-->
+    </div>
+</nav>
+<br/><br/><br/>
+<div id="blogs" class="container">
+    <div class="row justify-content-center bg-secondary">
+        {{#if blogPublished.length}}
+            <ul class="list-group list-group-flush w-100" id="articleList">
+                {{#each blogPublished}}
+                    <li class="list-group-item bg-secondary border-0 article-item"
+                        data-title="{{this.title}}"
+                        data-username="{{this.username}}"
+                        data-date="{{this.date}}">
+                        <div class="card bg-dark text-light shadow-sm">
+                            <div class="card-body">
+                                <nav class="navbar navbar-dark bg-dark px-0">
+                                    <div class="container-fluid ">
+                                        <a class="navbar-brand text-success" href="/homepage/read/{{this.blogid}}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-journals" viewBox="0 0 16 16">
+                                                <path d="M5 0h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2 2 2 0 0 1-2 2H3a2 2 0 0 1-2-2h1a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1H1a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v9a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1H3a2 2 0 0 1 2-2"/>
+                                                <path d="M1 6v-.5a.5.5 0 0 1 1 0V6h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 3v-.5a.5.5 0 0 1 1 0V9h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1zm0 2.5v.5H.5a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1H2v-.5a.5.5 0 0 0-1 0"/>
+                                            </svg>
+                                            Click here to read</a>
+                                    </div>
+                                </nav>
+                                <h4 class="fw-bold">{{this.title}}</h4>
+                                <small>by {{this.username}}</small><br>
+                                <small class="text-secondary">
+                                    Created on {{this.date}}
+                                </small>
+                                <br/>
+                                <br>
+                                <div class="d-flex align-items-center gap-2">
+                                    <button
+                                            class="btn btn-sm like-btn {{#if this.userLiked}}btn-danger disabled{{else}}btn-outline-danger{{/if}}"
+                                            data-blogid="{{this.blogid}}"
+                                            data-liked="{{this.userLiked}}"
+                                            {{#if this.userLiked}}disabled{{/if}}
+                                    >
+                                        {{#if userLiked}}❤️ Liked{{else}}🤍 Like{{/if}}
+                                    </button>
+                                    <span id="likeCount" class="text-muted">
+        {{likeCount}} likes
+    </span>
+                                </div>
+                                <br/>
+
+                            </div>
+                        </div>
+                    </li>
+                {{/each}}
+            </ul>
+        {{else}}
+            <p class="text-muted text-center">
+                No blogs published yet.
+            </p>
+        {{/if}}
+    </div>
+    <br/>
+</div>
+
+<script>
+    const sortSelect = document.querySelector('#sortSelect');
+    const articleList = document.querySelector('#articleList');
+
+    sortSelect.addEventListener("change", function() {
+        // Get the selected value
+        const sortValue = this.value;
+
+        // Checking if we have articles to sort
+        if (!articleList) return;
+
+        // Get all article items
+        const items = Array.from(articleList.querySelectorAll(".article-item"));
+
+        // If no items or no sort value selected, do nothing
+        if (items.length === 0 || !sortValue) return;
+
+        // Sort the items
+        items.sort((a, b) => {
+            if (sortValue === 'username') {
+                const aUsername = a.getAttribute('data-username') || '';
+                const bUsername = b.getAttribute('data-username') || '';
+                return aUsername.localeCompare(bUsername);
+            }
+            else if (sortValue === 'usernamed') {
+                const aUsername = a.getAttribute('data-username') || '';
+                const bUsername = b.getAttribute('data-username') || '';
+                return bUsername.localeCompare(aUsername);
+            }
+            else if (sortValue === 'title') {
+                const aTitle = a.getAttribute('data-title') || '';
+                const bTitle = b.getAttribute('data-title') || '';
+                return aTitle.localeCompare(bTitle);
+            }
+            else if (sortValue === 'titled') {
+                const aTitle = a.getAttribute('data-title') || '';
+                const bTitle = b.getAttribute('data-title') || '';
+                return bTitle.localeCompare(aTitle);
+            }
+            else if (sortValue === 'date') {
+                const aDate = a.getAttribute('data-date') || '';
+                const bDate = b.getAttribute('data-date') || '';
+                // For date comparison
+                return new Date(aDate) - new Date(bDate);
+            }
+            else if (sortValue === 'dated') {
+                const aDate = a.getAttribute('data-date') || '';
+                const bDate = b.getAttribute('data-date') || '';
+                // For date comparison
+                return new Date(bDate) - new Date(aDate);
+            }
+
+            return 0;
+        });
+
+        // Clear the list and re-add sorted items
+        articleList.innerHTML = '';
+        items.forEach(item => {
+            articleList.appendChild(item);
+        });
+    });
+
+    document.querySelectorAll('.like-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+
+            // 🔒 Already liked? Do nothing
+            if (btn.dataset.liked === 'true') return;
+
+            const blogid = btn.dataset.blogid;
+            const countEl = btn.nextElementSibling;
+
+            fetch(`/homepage/like/${blogid}`, { method: 'POST' })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (!data.liked) return;
+
+                        // Lock state
+                        btn.dataset.liked = 'true';
+                        btn.disabled = true;
+
+                        // Update count
+                        const count = parseInt(countEl.innerText);
+                        countEl.innerText = `${count + 1} likes`;
+
+                        // Update UI
+                        btn.className = 'btn btn-sm like-btn btn-danger disabled';
+                        btn.innerText = '❤️ Liked';
+                    });
+        });
+    });
+
+</script>
